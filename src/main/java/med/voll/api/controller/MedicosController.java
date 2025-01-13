@@ -1,7 +1,8 @@
 package med.voll.api.controller;
 
 import jakarta.validation.Valid;
-import med.voll.api.medico.*;
+import med.voll.api.domain.medico.*;
+import med.voll.api.domain.medico.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,12 +19,15 @@ public class MedicosController {
     @Autowired
     private MedicoRepository repository;
 
+
     @PostMapping
     @Transactional
     public ResponseEntity cadastrar(@RequestBody @Valid DadosCadastroMedico dados, UriComponentsBuilder uriBuilder){
         var medico = new Medico(dados);
         repository.save(medico);
 
+        //Usado para criar a URL ou caminho do recurso criado, e retornar no cabeçalho da resposta, para
+        //ser usado no frontend
         var uri = uriBuilder.path("/medicos/{id}").buildAndExpand(medico.getId()).toUri();
 
         return ResponseEntity.created(uri).body(new DadosDetalhamentoMedico(medico));
@@ -69,6 +73,12 @@ public class MedicosController {
         var medico = repository.getReferenceById(id);
         medico.excluirLogico();
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity detalharCadastro(@PathVariable Long id){
+        var medico = repository.getReferenceById(id);
+        return ResponseEntity.ok(new DadosDetalhamentoMedico(medico));
     }
 
 }
